@@ -1,0 +1,9 @@
+{
+    "APP_PORT" : "1333",
+    "APP_HOST" : "database.system.com",
+    "DB_HOST" : "mongodb_database",
+    "DB_DATABASE" : "database_module_db",
+    "DB_PORT" : "27017",
+    "DB_USER" : "test",
+    "DB_PASSWORD" : "new123"
+  }
