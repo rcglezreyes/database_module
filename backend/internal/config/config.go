@@ -2,6 +2,7 @@ package config
 
 import (
 	"backend/internal/entity"
+	"fmt"
 	"path/filepath"
 	"runtime"
 	"strconv"
@@ -25,19 +26,37 @@ func RootDir() string {
 	return filepath.Join(filepath.Dir(b), "../..")
 }
 
-func DBCredentials() (entity.MongoDBCredentials, error) {
-	port, err := strconv.Atoi(viper.GetString(Port))
-	if err != nil {
-		return entity.MongoDBCredentials{}, err
+func DBCredentials() (entity.MongoDBCredentials, entity.DBCredentials, error) {
+	var host, user, password, dbname string
+	var port int
+	if viper.GetString(Envirornment) == "DEV" {
+		host = viper.GetString(HostDev)
+		user = viper.GetString(UserDev)
+		password = viper.GetString(PasswordDev)
+		dbname = viper.GetString(DbnameDev)
+		port, _ = strconv.Atoi(viper.GetString(PortDev))
+	} else {
+		host = viper.GetString(HostQa)
+		user = viper.GetString(UserQa)
+		password = viper.GetString(PasswordQa)
+		dbname = viper.GetString(DbnameQa)
+		port, _ = strconv.Atoi(viper.GetString(PortQa))
 	}
 	dbCredentials := entity.DBCredentials{
-		Host:     viper.GetString(Host),
+		Host:     host,
 		Port:     port,
-		User:     viper.GetString(User),
-		Password: viper.GetString(Password),
-		Dbname:   viper.GetString(Dbname),
+		User:     user,
+		Password: password,
+		Dbname:   dbname,
 	}
+	uri := "mongodb://" +
+		dbCredentials.User + ":" +
+		dbCredentials.Password + "@" +
+		dbCredentials.Host + ":" +
+		strconv.Itoa(dbCredentials.Port) + "/" +
+		dbCredentials.Dbname + "?authMechanism=SCRAM-SHA-1&authSource=admin"
+	fmt.Println(uri)
 	return entity.MongoDBCredentials{
-		URI: "mongodb://" + dbCredentials.User + ":" + dbCredentials.Password + "@" + dbCredentials.Host + ":" + strconv.Itoa(dbCredentials.Port),
-	}, nil
+		URI: uri,
+	}, dbCredentials, nil
 }

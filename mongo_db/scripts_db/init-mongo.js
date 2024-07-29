@@ -12,9 +12,12 @@ db = db.getSiblingDB('database_module_db');
 
 if (db.system.users.find({ user: "dbuser" }).count() === 0) {
   db.createUser({
-    user: "dbuser",
+    user: "test",
     pwd: "new123",
-    roles: [{ role: "readWrite", db: "database_module_db" }]
+    roles: [
+      { role: "readWrite", db: "database_module_db" },
+      { role: "dbAdmin", db: "database_module_db" }
+    ]
   });
 }
 

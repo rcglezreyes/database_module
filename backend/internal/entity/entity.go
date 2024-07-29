@@ -1,5 +1,7 @@
 package entity
 
+import "log"
+
 // Courses estructura para el archivo courses.csv
 type Courses struct {
 	CodeModule       string `json:"code_module"`
@@ -80,4 +82,12 @@ type DBCredentials struct {
 
 type MongoDBCredentials struct {
 	URI string
+}
+type Loggers struct {
+	InfoLogger  *log.Logger
+	ErrorLogger *log.Logger
+}
+type ResponseGeneric struct {
+	Status  string `json:"status"`
+	Message string `json:"message"`
 }

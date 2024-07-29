@@ -5,7 +5,7 @@ services:
       context: ./backend
     container_name: golang_backend_app
     ports:
-      - "1333:1333"
+      - "1300:1300"
     networks:
       - database_module
 
