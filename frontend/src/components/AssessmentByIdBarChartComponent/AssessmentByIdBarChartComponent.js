@@ -17,7 +17,7 @@ const AssessmentByIdBarChartComponent = ({ data }) => {
         display: 'flex', 
         justifyContent: 'center', 
         alignItems: 'center', 
-        height: '100%', // Ocupa toda la altura visible
+        height: '100%', 
         width: '100%',
       }}
     >
