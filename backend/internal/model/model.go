@@ -29,7 +29,11 @@ type Model interface {
 	GetFiles() ([]*entity.FileInfo, error)
 	GetData(collection string) ([]interface{}, error)
 	GetAllCountData(collections []string) (map[string]int64, error)
-	ProcessDataPredictionAssessments() (map[string][]interface{}, error)
+	ProcessDataPredictionAssessments() ([]entity.ProcessedPredictionAssessmentResult, error)
+	ProcessDataVlePredictions() ([]entity.ProcessedPredictionVleResult, error)
+	GetScoreDistributionPredictionAssessments() ([]entity.ScoreRangePredictionAssessments, error)
+	GetAveragePredictedScoreByAssessmentType() ([]entity.AssessmentTypeAverage, error)
+	GetStudentCountByAssessmentID() ([]entity.AssessmentStudentCount, error)
 }
 
 func NewModel(client client.MongoDBClient, loggers *entity.Loggers) Model {
@@ -370,9 +374,27 @@ func (m *model) GetAllCountData(collections []string) (map[string]int64, error) 
 func (m *model) GetData(collection string) ([]interface{}, error) {
 	return m.client.GetData(m.dbCredentials.Dbname, collection)
 }
-func (m *model) ProcessDataPredictionAssessments() (map[string][]interface{}, error) {
+
+func (m *model) ProcessDataPredictionAssessments() ([]entity.ProcessedPredictionAssessmentResult, error) {
 	return m.client.ProcessDataPredictionAssessments(m.dbCredentials.Dbname)
 }
+
+func (m *model) ProcessDataVlePredictions() ([]entity.ProcessedPredictionVleResult, error) {
+	return m.client.ProcessDataVlePredictions(m.dbCredentials.Dbname)
+}
+
+func (m *model) GetScoreDistributionPredictionAssessments() ([]entity.ScoreRangePredictionAssessments, error) {
+	return m.client.GetScoreDistributionPredictionAssessments(m.dbCredentials.Dbname)
+}
+
+func (m *model) GetAveragePredictedScoreByAssessmentType() ([]entity.AssessmentTypeAverage, error) {
+	return m.client.GetAveragePredictedScoreByAssessmentType(m.dbCredentials.Dbname)
+}
+
+func (m *model) GetStudentCountByAssessmentID() ([]entity.AssessmentStudentCount, error) {
+	return m.client.GetStudentCountByAssessmentID(m.dbCredentials.Dbname)
+}
+
 func (m *model) formatFileSize(size int64) string {
 	const (
 		KB = 1 << (10 * (iota + 1))

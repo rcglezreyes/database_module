@@ -15,7 +15,11 @@ type Service interface {
 	GetFiles() ([]*entity.FileInfo, error)
 	GetData(collection string) ([]interface{}, error)
 	GetAllCountData(collections []string) (map[string]int64, error)
-	ProcessDataPredictionAssessments() (map[string][]interface{}, error)
+	ProcessDataPredictionAssessments() ([]entity.ProcessedPredictionAssessmentResult, error)
+	ProcessDataVlePredictions() ([]entity.ProcessedPredictionVleResult, error)
+	GetScoreDistributionPredictionAssessments() ([]entity.ScoreRangePredictionAssessments, error)
+	GetAveragePredictedScoreByAssessmentType() ([]entity.AssessmentTypeAverage, error)
+	GetStudentCountByAssessmentID() ([]entity.AssessmentStudentCount, error)
 }
 
 func NewService(model model.Model, loggers *entity.Loggers) Service {
@@ -39,6 +43,19 @@ func (s *service) GetData(collection string) ([]interface{}, error) {
 func (s *service) GetAllCountData(collections []string) (map[string]int64, error) {
 	return s.model.GetAllCountData(collections)
 }
-func (s *service) ProcessDataPredictionAssessments() (map[string][]interface{}, error) {
+func (s *service) ProcessDataPredictionAssessments() ([]entity.ProcessedPredictionAssessmentResult, error) {
 	return s.model.ProcessDataPredictionAssessments()
+}
+func (s *service) ProcessDataVlePredictions() ([]entity.ProcessedPredictionVleResult, error) {
+	return s.model.ProcessDataVlePredictions()
+}
+func (s *service) GetScoreDistributionPredictionAssessments() ([]entity.ScoreRangePredictionAssessments, error) {
+	return s.model.GetScoreDistributionPredictionAssessments()
+}
+func (s *service) GetAveragePredictedScoreByAssessmentType() ([]entity.AssessmentTypeAverage, error) {
+	return s.model.GetAveragePredictedScoreByAssessmentType()
+}
+
+func (s *service) GetStudentCountByAssessmentID() ([]entity.AssessmentStudentCount, error) {
+	return s.model.GetStudentCountByAssessmentID()
 }

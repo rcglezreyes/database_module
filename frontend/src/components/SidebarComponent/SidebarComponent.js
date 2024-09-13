@@ -33,12 +33,18 @@ const SidebarComponent = () => {
                         </ListItemIcon>
                         <ListItemText primary="Upload Data" />
                     </ListItemButton>
-                    <ListItemButton key="Process Data" component={Link} to="/info/process_prediction_assessments">
+                    <ListItemButton key="Process Data Assessments" component={Link} to="/info/process_prediction_assessments">
                         <ListItemIcon>
                             <AutorenewIcon />
                         </ListItemIcon>
-                        <ListItemText primary="Process Data" />
+                        <ListItemText primary="Process Data Assessments" />
                     </ListItemButton>
+                    {/* <ListItemButton key="Process Data VLE" component={Link} to="/info/process_prediction_vle">
+                        <ListItemIcon>
+                            <AutorenewIcon />
+                        </ListItemIcon>
+                        <ListItemText primary="Process Data VLE" />
+                    </ListItemButton> */}
             </List>
         </Drawer>
     );

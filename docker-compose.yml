@@ -26,6 +26,8 @@ services:
       - ./frontend/build:/app/build 
     env_file:
       - ./frontend/.env
+    ports:
+      - "3005:3005"
     networks:
       - database_module
     deploy:
@@ -85,32 +87,32 @@ services:
           cpus: '0.25'
           memory: 256m
 
-  nginx_server:
-    build:
-      context: ./nginx
-    container_name: nginx_server
-    ports:
-      - "80:80"
-      - "443:443"
-    extra_hosts:
-      - "database.system.com:10.0.0.95"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/certificates:/etc/nginx/certificates:ro
-      - ./frontend/build:/usr/share/nginx/html 
-    depends_on:
-      - golang_backend_app
-      - react_frontend_app
-    networks:
-      - database_module
-    deploy:
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: 2g
-        reservations:
-          cpus: '0.5'
-          memory: 1g
+  # nginx_server:
+  #   build:
+  #     context: ./nginx
+  #   container_name: nginx_server
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   extra_hosts:
+  #     - "database.system.com:10.0.0.95"
+  #   volumes:
+  #     - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+  #     - ./nginx/certificates:/etc/nginx/certificates:ro
+  #     - ./frontend/build:/usr/share/nginx/html 
+  #   depends_on:
+  #     - golang_backend_app
+  #     - react_frontend_app
+  #   networks:
+  #     - database_module
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: '1.0'
+  #         memory: 2g
+  #       reservations:
+  #         cpus: '0.5'
+  #         memory: 1g
 
 volumes:
   mongodb_datatase_data:

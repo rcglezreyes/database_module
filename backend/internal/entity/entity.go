@@ -112,3 +112,30 @@ type ProcessedPredictionAssessmentResult struct {
 	AssessmentID   int     `bson:"assessment_id"`
 	PredictedScore float64 `bson:"predicted_score"`
 }
+
+type PredictionVle struct {
+	StudentID    int    `bson:"id_student"`
+	ResourceType string `bson:"resource_type"`
+	Clicks       int    `bson:"sum_click"`
+}
+
+// Estructura para almacenar el resultado del procesamiento
+type ProcessedPredictionVleResult struct {
+	StudentID      int     `bson:"student_id"`
+	PredictedScore float64 `bson:"predicted_score"`
+}
+
+type ScoreRangePredictionAssessments struct {
+	Range        string `json:"range"`
+	StudentCount int    `json:"student_count"`
+}
+
+type AssessmentTypeAverage struct {
+    AssessmentType string  `bson:"assessment_type"`
+    AverageScore   float64 `bson:"average_score"`
+}
+
+type AssessmentStudentCount struct {
+	AssessmentID int `bson:"_id"`
+	StudentCount int    `bson:"student_count"`
+}

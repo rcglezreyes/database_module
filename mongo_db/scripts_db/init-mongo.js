@@ -21,7 +21,7 @@ if (db.system.users.find({ user: "dbuser" }).count() === 0) {
   });
 }
 
-db.createCollection("predictions_assessments");
-db.createCollection("predictions_vle");
-db.createCollection("predictions_risks");
+// db.createCollection("predictions_assessments");
+// db.createCollection("predictions_vle");
+// db.createCollection("predictions_risks");
 db.login.insertOne({ user: "test", password: "new123" });

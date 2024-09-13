@@ -14,6 +14,7 @@ function App() {
               <Route path="info/download" element={<InfoComponent/>} />
               <Route path="info/upload" element={<InfoComponent/>} />
               <Route path="info/process_prediction_assessments" element={<InfoComponent/>} />
+              <Route path="info/process_prediction_vle" element={<InfoComponent/>} />
             </Route>
         </Routes>
     </Router>

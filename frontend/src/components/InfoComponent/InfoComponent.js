@@ -60,6 +60,21 @@ const InfoComponent = () => {
         }
     };
 
+    const processPredictionsVle = async () => {
+        try {
+            const response = await axios.post(`${apiURL}/process_data_prediction_vle`);
+            const data = response.data;
+            setMessage(data.message);
+            setSeverity('success');
+        } catch (error) {
+            console.error('Error processing predictions vle:', error);
+            setMessage(`Error processing predictions vle: ${error}`);
+            setSeverity('error');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
         if (location === '/info/download') {
             setMessage('Downloading files...');
@@ -71,6 +86,10 @@ const InfoComponent = () => {
         }
         else if (location === '/info/process_prediction_assessments') {
             setMessage('Processing prediction assessments data...');
+            processPredictionsAssessments();
+        }
+        else if (location === '/info/process_prediction_vle') {
+            setMessage('Processing prediction VLE data...');
             processPredictionsAssessments();
         }
     }, [location]);

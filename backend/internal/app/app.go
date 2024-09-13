@@ -32,6 +32,10 @@ func (a *app) ConfigRoutes(e *echo.Echo) {
 	e.GET("/api_backend/get_data/:collection", a.GetData)
 	e.POST("/api_backend/get_all_data", a.GetAllCountData)
 	e.POST("/api_backend/process_data_prediction_assessments", a.ProcessDataPredictionAssessments)
+	e.POST("/api_backend/process_data_prediction_vle", a.ProcessDataVlePredictions)
+	e.GET("/api_backend/get_score_distribution_prediction_assessments", a.GetScoreDistributionPredictionAssessments)
+	e.GET("/api_backend/get_average_predicted_score_by_assessment_type", a.GetAveragePredictedScoreByAssessmentType)
+	e.GET("/api_backend/get_student_count_by_assessment_id", a.GetStudentCountByAssessmentID)
 }
 func (a *app) LoadBatchData(c echo.Context) error {
 	err := a.service.LoadBatchData()
@@ -108,6 +112,49 @@ func (a *app) GetAllCountData(c echo.Context) error {
 }
 func (a *app) ProcessDataPredictionAssessments(c echo.Context) error {
 	data, err := a.service.ProcessDataPredictionAssessments()
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, entity.ResponseGeneric{
+			Status:  "Failed (Getting Data)",
+			Message: err.Error(),
+		})
+	}
+	return c.JSON(http.StatusOK, data)
+}
+func (a *app) ProcessDataVlePredictions(c echo.Context) error {
+	data, err := a.service.ProcessDataVlePredictions()
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, entity.ResponseGeneric{
+			Status:  "Failed (Getting Data)",
+			Message: err.Error(),
+		})
+	}
+	return c.JSON(http.StatusOK, data)
+}
+
+func (a *app) GetScoreDistributionPredictionAssessments(c echo.Context) error {
+	data, err := a.service.GetScoreDistributionPredictionAssessments()
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, entity.ResponseGeneric{
+			Status:  "Failed (Getting Data)",
+			Message: err.Error(),
+		})
+	}
+	return c.JSON(http.StatusOK, data)
+}
+
+func (a *app) GetAveragePredictedScoreByAssessmentType(c echo.Context) error {
+	data, err := a.service.GetAveragePredictedScoreByAssessmentType()
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, entity.ResponseGeneric{
+			Status:  "Failed (Getting Data)",
+			Message: err.Error(),
+		})
+	}
+	return c.JSON(http.StatusOK, data)
+}
+
+func (a *app) GetStudentCountByAssessmentID(c echo.Context) error {
+	data, err := a.service.GetStudentCountByAssessmentID()
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, entity.ResponseGeneric{
 			Status:  "Failed (Getting Data)",
