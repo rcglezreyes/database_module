@@ -27,7 +27,7 @@ COPY --from=build /app/main .
 COPY config.json /app/config.json
 
 # Expone el puerto
-EXPOSE 1333
+EXPOSE 1300
 
 # Comando para ejecutar la aplicación
 CMD ["./main"]

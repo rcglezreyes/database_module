@@ -1,13 +1,22 @@
 services:
-
   golang_backend_app:
     build:
       context: ./backend
     container_name: golang_backend_app
+    volumes:
+      - ./backend/files:/app/temp
     ports:
       - "1300:1300"
     networks:
       - database_module
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4g
+        reservations:
+          cpus: '1.0'
+          memory: 2g
 
   react_frontend_app:
     build:
@@ -19,6 +28,14 @@ services:
       - ./frontend/.env
     networks:
       - database_module
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2g
+        reservations:
+          cpus: '0.5'
+          memory: 1g
 
   mongodb_database:
     build:
@@ -34,6 +51,14 @@ services:
       - ./mongo_db/scripts_db:/docker-entrypoint-initdb.d
     networks:
       - database_module
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4g
+        reservations:
+          cpus: '1.0'
+          memory: 2g
 
   mongo_express_database:
     image: mongo-express:latest
@@ -51,8 +76,16 @@ services:
       - mongodb_database
     networks:
       - database_module
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512m
+        reservations:
+          cpus: '0.25'
+          memory: 256m
 
-  nginx:
+  nginx_server:
     build:
       context: ./nginx
     container_name: nginx_server
@@ -67,9 +100,17 @@ services:
       - ./frontend/build:/usr/share/nginx/html 
     depends_on:
       - golang_backend_app
-      # - react_frontend_app
+      - react_frontend_app
     networks:
       - database_module
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2g
+        reservations:
+          cpus: '0.5'
+          memory: 1g
 
 volumes:
   mongodb_datatase_data:

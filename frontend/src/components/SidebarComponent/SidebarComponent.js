@@ -3,10 +3,13 @@ import { Drawer, List, ListItemButton, ListItemIcon, ListItemText, Toolbar } fro
 import DownloadIcon from '@mui/icons-material/Download';
 import UploadIcon from '@mui/icons-material/Upload';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
+import { Link } from 'react-router-dom';
+
 
 const drawerWidth = 240;
 
 const SidebarComponent = () => {
+
     return (
         <Drawer
             variant="permanent"
@@ -18,19 +21,19 @@ const SidebarComponent = () => {
         >
             <Toolbar />
             <List>
-                    <ListItemButton key="Download Data">
+                    <ListItemButton key="Download Data" component={Link} to="/info/download">
                         <ListItemIcon>
                             <DownloadIcon />
                         </ListItemIcon>
-                        <ListItemText primary="Download Data" />
+                        <ListItemText primary="Download Data"/>
                     </ListItemButton>
-                    <ListItemButton key="Upload Data">
+                    <ListItemButton key="Upload Data" component={Link} to="/info/upload">
                         <ListItemIcon>
                             <UploadIcon />
                         </ListItemIcon>
                         <ListItemText primary="Upload Data" />
                     </ListItemButton>
-                    <ListItemButton key="Process Data">
+                    <ListItemButton key="Process Data" component={Link} to="/info/process_prediction_assessments">
                         <ListItemIcon>
                             <AutorenewIcon />
                         </ListItemIcon>

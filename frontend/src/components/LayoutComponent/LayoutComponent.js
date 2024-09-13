@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, CssBaseline } from '@mui/material';
 import TopbarComponent from '../TopbarComponent/TopbarComponent';
 import SidebarComponent from '../SidebarComponent/SidebarComponent';
-import MainContentComponent from '../MainContentComponent/MainContentComponent';
+import { Outlet } from 'react-router-dom';
 
 const LayoutComponent = ({ children }) => {
     return (
@@ -10,9 +10,7 @@ const LayoutComponent = ({ children }) => {
             <CssBaseline />
             <TopbarComponent />
             <SidebarComponent />
-            <MainContentComponent>
-                {children}
-            </MainContentComponent>
+            <Outlet />
         </Box>
     );
 };

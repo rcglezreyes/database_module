@@ -1,6 +1,9 @@
 package entity
 
-import "log"
+import (
+	"log"
+	"time"
+)
 
 // Courses estructura para el archivo courses.csv
 type Courses struct {
@@ -37,7 +40,7 @@ type StudentInfo struct {
 	Gender            string `json:"gender"`
 	Region            string `json:"region"`
 	HighestEducation  string `json:"highest_education"`
-	IMDBand           int    `json:"imd_band"`
+	IMDBand           string `json:"imd_band"`
 	AgeBand           string `json:"age_band"`
 	NumOfPrevAttempts int    `json:"num_of_prev_attempts"`
 	StudiedCredits    int    `json:"studied_credits"`
@@ -59,7 +62,7 @@ type StudentAssessment struct {
 	IdAssessment  int     `json:"id_assessment"`
 	IdStudent     int     `json:"id_student"`
 	DateSubmitted int     `json:"date_submitted"`
-	IsBounced     int     `json:"is_bounced"`
+	IsBanked      int     `json:"is_banked"`
 	Score         float64 `json:"score"`
 }
 
@@ -90,4 +93,22 @@ type Loggers struct {
 type ResponseGeneric struct {
 	Status  string `json:"status"`
 	Message string `json:"message"`
+}
+type FileInfo struct {
+	FileName string `json:"file_name"`
+	FileSize string `json:"file_size"`
+}
+type CollectionsRequest struct {
+	Collections []string `json:"collections"`
+}
+type PredictionAssessment struct {
+	StudentID      int       `bson:"student_id"`
+	AssessmentID   int       `bson:"assessment_id"`
+	PredictedScore float64   `bson:"predicted_score"`
+	PredictionDate time.Time `bson:"prediction_date"`
+}
+type ProcessedPredictionAssessmentResult struct {
+	StudentID      int     `bson:"student_id"`
+	AssessmentID   int     `bson:"assessment_id"`
+	PredictedScore float64 `bson:"predicted_score"`
 }

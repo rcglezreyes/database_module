@@ -26,6 +26,10 @@ type model struct {
 type Model interface {
 	LoadBatchData() error
 	DownloadData() error
+	GetFiles() ([]*entity.FileInfo, error)
+	GetData(collection string) ([]interface{}, error)
+	GetAllCountData(collections []string) (map[string]int64, error)
+	ProcessDataPredictionAssessments() (map[string][]interface{}, error)
 }
 
 func NewModel(client client.MongoDBClient, loggers *entity.Loggers) Model {
@@ -43,7 +47,7 @@ func (m *model) LoadBatchData() error {
 	if enviroment == "DEV" {
 		homeDir, err := os.UserHomeDir()
 		if err != nil {
-			m.loggers.ErrorLogger.Fatalf("No se pudo obtener el directorio de inicio del usuario: %v", err)
+			m.loggers.ErrorLogger.Printf("No se pudo obtener el directorio de inicio del usuario: %v", err)
 		}
 		filePathRead = filepath.Join(homeDir, viper.GetString(config.FilePathReadDev))
 	} else {
@@ -64,10 +68,11 @@ func (m *model) LoadBatchData() error {
 	}
 	for _, file := range files {
 		m.loggers.InfoLogger.Printf("Procesando archivo: %s", file.Path)
-		if err := m.processCSVInBatches(file.Path, 1000, func(batch [][]string) error {
+		batchSize := viper.GetInt(config.BatchSize)
+		if err := m.processCSVInBatches(file.Path, batchSize, func(batch [][]string) error {
 			return file.ProcessBatch(file.Collection, batch)
 		}); err != nil {
-			m.loggers.ErrorLogger.Fatalf("Error al procesar archivo %s: %v", file.Path, err)
+			m.loggers.ErrorLogger.Printf("Error al procesar archivo %s: %v", file.Path, err)
 		}
 	}
 
@@ -77,41 +82,51 @@ func (m *model) LoadBatchData() error {
 }
 
 func (m *model) DownloadData() error {
-	url := viper.GetString(config.UrlOulad)
-	m.loggers.InfoLogger.Printf("Descargando archivo de: %s", url)
-	var pathDownload, zipPath, extractPath string
+	files, err := m.GetFiles()
+	if err != nil {
+		m.loggers.ErrorLogger.Printf("Error al obtener archivos: %v", err)
+		return err
+	}
+	if len(files) == 0 {
+		url := viper.GetString(config.UrlOulad)
+		m.loggers.InfoLogger.Printf("Descargando archivo de: %s", url)
+		var pathDownload, zipPath, extractPath string
 
-	environment := viper.GetString(config.Envirornment)
-	if environment == "DEV" {
-		homeDir, err := os.UserHomeDir()
-		if err != nil {
-			m.loggers.ErrorLogger.Fatalf("No se pudo obtener el directorio de inicio del usuario: %v", err)
+		environment := viper.GetString(config.Envirornment)
+		if environment == "DEV" {
+			homeDir, err := os.UserHomeDir()
+			if err != nil {
+				m.loggers.ErrorLogger.Printf("No se pudo obtener el directorio de inicio del usuario: %v", err)
+			}
+			pathDownload = filepath.Join(homeDir, viper.GetString(config.FilePathDownloadDev))
+			zipPath = filepath.Join(pathDownload, viper.GetString(config.FileNameZip))
+			extractPath = filepath.Join(homeDir, viper.GetString(config.FilePathReadDev))
+		} else {
+			zipPath = viper.GetString(config.FilePathDownloadQa) + "/" + viper.GetString(config.FileNameZip)
+			extractPath = viper.GetString(config.FilePathDownloadQa)
 		}
-		pathDownload = filepath.Join(homeDir, viper.GetString(config.FilePathDownloadDev))
-		zipPath = filepath.Join(pathDownload, viper.GetString(config.FileNameZip))
-		extractPath = filepath.Join(homeDir, viper.GetString(config.FilePathReadDev))
-	} else {
-		zipPath = viper.GetString(config.FilePathDownloadQa) + "/" + viper.GetString(config.FileNameZip)
-		extractPath = viper.GetString(config.FilePathDownloadQa)
-	}
 
-	log.Println("Descargando archivo...")
-	err := m.downloadZip(url, zipPath)
-	if err != nil {
-		m.loggers.ErrorLogger.Fatalf("Error al descargar archivo: %v", err)
-		return err
-	}
-	m.loggers.InfoLogger.Println("Archivo descargado exitosamente.")
+		log.Println("Descargando archivo...")
+		err := m.downloadZip(url, zipPath)
+		if err != nil {
+			m.loggers.ErrorLogger.Printf("Error al descargar archivo: %v", err)
+			return err
+		}
+		m.loggers.InfoLogger.Println("Archivo descargado exitosamente.")
 
-	log.Println("Descomprimiendo archivo...")
-	err = m.unzipFile(zipPath, extractPath)
-	if err != nil {
-		m.loggers.ErrorLogger.Fatalf("Error al descomprimir archivo: %v", err)
-		return err
+		log.Println("Descomprimiendo archivo...")
+		err = m.unzipFile(zipPath, extractPath)
+		if err != nil {
+			m.loggers.ErrorLogger.Printf("Error al descomprimir archivo: %v", err)
+			return err
+		}
+		log.Println("Archivo descomprimido exitosamente.")
+		return nil
 	}
-	log.Println("Archivo descomprimido exitosamente.")
+	m.loggers.InfoLogger.Println("No hay archivos para descargar.")
 	return nil
 }
+
 func (m *model) processCSVInBatches(filePath string, batchSize int, processBatch func([][]string) error) error {
 	file, err := os.Open(filePath)
 	if err != nil {
@@ -160,13 +175,13 @@ func (m *model) processBatch(collectionName string, batch [][]string) error {
 			}
 			data = append(data, value)
 		case "assessments":
-			idAssessment, _ := strconv.Atoi(record[0])
+			idAssessment, _ := strconv.Atoi(record[2])
 			date, _ := strconv.Atoi(record[4])
 			weight, _ := strconv.Atoi(record[5])
 			value := entity.Assessments{
 				IdAssessment:     idAssessment,
-				CodeModule:       record[1],
-				CodePresentation: record[2],
+				CodeModule:       record[0],
+				CodePresentation: record[1],
 				AssessmentType:   record[3],
 				Date:             date,
 				Weight:           weight,
@@ -186,18 +201,17 @@ func (m *model) processBatch(collectionName string, batch [][]string) error {
 			}
 			data = append(data, value)
 		case "studentInfo":
-			idStudent, _ := strconv.Atoi(record[0])
-			imdBand, _ := strconv.Atoi(record[6])
+			idStudent, _ := strconv.Atoi(record[2])
 			numOfPrevAttempts, _ := strconv.Atoi(record[8])
 			studiedCredits, _ := strconv.Atoi(record[9])
 			value := entity.StudentInfo{
 				IdStudent:         idStudent,
-				CodeModule:        record[1],
-				CodePresentation:  record[2],
+				CodeModule:        record[0],
+				CodePresentation:  record[1],
 				Gender:            record[3],
 				Region:            record[4],
 				HighestEducation:  record[5],
-				IMDBand:           imdBand,
+				IMDBand:           record[6],
 				AgeBand:           record[7],
 				NumOfPrevAttempts: numOfPrevAttempts,
 				StudiedCredits:    studiedCredits,
@@ -221,13 +235,13 @@ func (m *model) processBatch(collectionName string, batch [][]string) error {
 			idAssessment, _ := strconv.Atoi(record[0])
 			idStudent, _ := strconv.Atoi(record[1])
 			dateSubmitted, _ := strconv.Atoi(record[2])
-			isBounced, _ := strconv.Atoi(record[3])
+			isBanked, _ := strconv.Atoi(record[3])
 			score, _ := strconv.ParseFloat(record[4], 64)
 			value := entity.StudentAssessment{
 				IdAssessment:  idAssessment,
 				IdStudent:     idStudent,
 				DateSubmitted: dateSubmitted,
-				IsBounced:     isBounced,
+				IsBanked:      isBanked,
 				Score:         score,
 			}
 			data = append(data, value)
@@ -248,7 +262,6 @@ func (m *model) processBatch(collectionName string, batch [][]string) error {
 		}
 	}
 	batchSize := viper.GetInt(config.BatchSize)
-	m.loggers.InfoLogger.Printf("Insertando %d registros en la colección %s", len(data), collectionName)
 	err := m.client.BatchInsert(m.dbCredentials.Dbname, collectionName, data, batchSize)
 	return err
 }
@@ -316,4 +329,65 @@ func (m *model) unzipFile(src, dest string) error {
 		}
 	}
 	return nil
+}
+
+func (m *model) GetFiles() ([]*entity.FileInfo, error) {
+	var dirPath string
+	environment := viper.GetString(config.Envirornment)
+	if environment == "DEV" {
+		homeDir, err := os.UserHomeDir()
+		if err != nil {
+			m.loggers.ErrorLogger.Printf("No se pudo obtener el directorio de inicio del usuario: %v", err)
+		}
+		dirPath = filepath.Join(homeDir, viper.GetString(config.FilePathReadDev))
+	} else {
+		dirPath = viper.GetString(config.FilePathDownloadQa)
+	}
+	m.loggers.InfoLogger.Printf("Obteniendo archivos de: %s", dirPath)
+
+	var files []*entity.FileInfo
+
+	err := filepath.Walk(dirPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() && strings.HasSuffix(info.Name(), ".csv") {
+			files = append(files, &entity.FileInfo{FileName: info.Name(), FileSize: m.formatFileSize(info.Size())})
+		}
+		return nil
+	})
+	m.loggers.InfoLogger.Printf("Se encontraron %d archivos", len(files))
+	if err != nil {
+		m.loggers.ErrorLogger.Printf("Error al obtener archivos: %v", err)
+		return nil, err
+	}
+	return files, nil
+}
+func (m *model) GetAllCountData(collections []string) (map[string]int64, error) {
+	return m.client.GetAllCountData(m.dbCredentials.Dbname, collections)
+}
+
+func (m *model) GetData(collection string) ([]interface{}, error) {
+	return m.client.GetData(m.dbCredentials.Dbname, collection)
+}
+func (m *model) ProcessDataPredictionAssessments() (map[string][]interface{}, error) {
+	return m.client.ProcessDataPredictionAssessments(m.dbCredentials.Dbname)
+}
+func (m *model) formatFileSize(size int64) string {
+	const (
+		KB = 1 << (10 * (iota + 1))
+		MB
+		GB
+	)
+
+	switch {
+	case size >= GB:
+		return fmt.Sprintf("%.2f GB", float64(size)/GB)
+	case size >= MB:
+		return fmt.Sprintf("%.2f MB", float64(size)/MB)
+	case size >= KB:
+		return fmt.Sprintf("%.2f KB", float64(size)/KB)
+	default:
+		return fmt.Sprintf("%d B", size)
+	}
 }

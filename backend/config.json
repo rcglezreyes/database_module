@@ -12,12 +12,12 @@
     "DB_USER_QA" : "root",
     "DB_PASSWORD_DEV" : "new123",
     "DB_PASSWORD_QA" : "new123",
-    "BATCH_SIZE" : 1000,
+    "BATCH_SIZE" : 5000,
     "URL_OULAD": "https://archive.ics.uci.edu/static/public/349/open+university+learning+analytics+dataset.zip",
     "FILE_PATH_DOWNLOAD_QA": "/tmp",
     "FILE_PATH_DOWNLOAD_DEV": "Downloads",
     "FILE_NAME_ZIP": "open+university+learning+analytics+dataset.zip",
-    "FILE_PATH_READ_QA": "/tmp/open+university+learning+analytics+dataset",
+    "FILE_PATH_READ_QA": "/tmp",
     "FILE_PATH_READ_DEV": "Downloads/open+university+learning+analytics+dataset",
-    "ENVIRONMENT": "DEV"
+    "ENVIRONMENT": "QA"
   }

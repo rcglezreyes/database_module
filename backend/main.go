@@ -9,6 +9,7 @@ import (
 	"backend/internal/service"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 
 	"github.com/labstack/echo/v4"
@@ -31,7 +32,10 @@ func main() {
 			Format: "method=${method}, uri=${uri}, status=${status}\n",
 		}))
 		e.Use(middleware.Recover())
-		e.Use(middleware.CORS())
+		e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+			AllowOrigins: []string{"http://localhost:3000", "https://database.system.com"},
+			AllowMethods: []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete},
+		}))
 		//Client
 		client := client.NewMongoDBClient(loggers)
 		// Conectar a MongoDB
